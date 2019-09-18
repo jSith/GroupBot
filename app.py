@@ -1,7 +1,7 @@
 import os
 from random import choice
 
-from flask import Flask, request
+from flask import Flask, request, Response
 import requests
 
 app = Flask(__name__)
@@ -24,7 +24,7 @@ def bot():
     message = _get_message()
     body = {'bot_id': BOT_ID, 'text': message}
     print(input)
-    return input
+    return Response(input)
     # requests.post(GROUPME + 'post', data=body)
     
 if __name__ == "__main__": 
