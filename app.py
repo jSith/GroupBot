@@ -26,8 +26,8 @@ def _get_message(text):
 @app.route('/api/rybot/', methods=['POST'])
 def bot(): 
     input = request.json
-    if '@RyBot' in text := input['text']: 
-        message = _get_message(text)
+    if '@RyBot' in input['text']: 
+        message = _get_message(input['text])
         body = {'bot_id': BOT_ID, 'text': message}
         requests.post(GROUPME + 'post', data=body)
     
