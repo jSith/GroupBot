@@ -21,11 +21,10 @@ def _get_message():
 @app.route('/api/rybot/', methods=['POST'])
 def bot(): 
     input = request.json
-    message = _get_message()
-    body = {'bot_id': BOT_ID, 'text': message}
-    print(input)
-    return Response(input)
-    # requests.post(GROUPME + 'post', data=body)
+    if '@RyBot' in input['text']: 
+        message = _get_message()
+        body = {'bot_id': BOT_ID, 'text': message}
+        requests.post(GROUPME + 'post', data=body)
     
 if __name__ == "__main__": 
     port = int(os.environ.get('PORT', 5000))
