@@ -5,7 +5,7 @@ from flask import Flask, request
 import requests
 
 app = Flask(__name__)
-BOT_ID = '9798531b12d783b20b9b5334ab'
+BOT_ID = '7af5564a9760b445535c79bc3a'
 GROUPME = 'https://api.groupme.com/v3/bots/'
 
 @app.route('/api/')
