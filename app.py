@@ -23,7 +23,8 @@ def bot():
     input = request.json
     message = _get_message()
     body = {'bot_id': BOT_ID, 'text': message}
-    requests.post(GROUPME + 'post', data=body)
+    return input
+    # requests.post(GROUPME + 'post', data=body)
     
 if __name__ == "__main__": 
     port = int(os.environ.get('PORT', 5000))
