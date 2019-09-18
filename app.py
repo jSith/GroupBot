@@ -27,7 +27,7 @@ def _get_message(text):
 def bot(): 
     input = request.json
     if '@RyBot' in input['text']: 
-        message = _get_message(input['text])
+        message = _get_message(input['text'])
         body = {'bot_id': BOT_ID, 'text': message}
         requests.post(GROUPME + 'post', data=body)
     
