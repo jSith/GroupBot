@@ -23,7 +23,7 @@ def _get_message(inputBody):
         message_base = choice(response_messages)
     else: 
         message_base = choice(neutral_messages)
-    message = f'Hi {name}, {message_base} - RyBot'
+    message = f'Hi {name}, \n {message_base} \n - RyBot'
     return message
 
 @app.route('/api/rybot/', methods=['POST'])
