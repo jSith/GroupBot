@@ -14,7 +14,7 @@ def hello_world():
 
 def _get_message(text): 
     response_messages = ['Yes', 'No', 'Maybe', 'A debilitating surgery would']
-    neutral_messages = ['Okay, 'Thanks']
+    neutral_messages = ['Okay', 'Thanks']
     message_base = ''
     if '?' in text: 
         message_base = choice(response_messages)
