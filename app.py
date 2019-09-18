@@ -23,6 +23,7 @@ def bot():
     input = request.json
     message = _get_message()
     body = {'bot_id': BOT_ID, 'text': message}
+    print(input)
     return input
     # requests.post(GROUPME + 'post', data=body)
     
