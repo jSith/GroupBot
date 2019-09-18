@@ -18,7 +18,7 @@ def _get_message():
     message = message_base + ' - RyBot'
     return message
 
-@app.route('/api/rybot/', methods='POST')
+@app.route('/api/rybot/', methods=['POST'])
 def bot(): 
     input = request.json
     message = _get_message()
