@@ -12,7 +12,10 @@ GROUPME = 'https://api.groupme.com/v3/bots/'
 def hello_world():
     return 'Hello, World!'
 
-def _get_message(text): 
+def _get_message(inputBody): 
+    text = inputBody['text']
+    name = inputBody.get('name')
+    
     response_messages = ['Yes', 'No', 'Maybe', 'A debilitating surgery would']
     neutral_messages = ['Okay', 'Thanks']
     message_base = ''
@@ -20,14 +23,14 @@ def _get_message(text):
         message_base = choice(response_messages)
     else: 
         message_base = choice(neutral_messages)
-    message = message_base + ' - RyBot'
+    message = f'Hi {name}, {message_base} - RyBot'
     return message
 
 @app.route('/api/rybot/', methods=['POST'])
 def bot(): 
-    input = request.json
-    if '@RyBot' in input['text']: 
-        message = _get_message(input['text'])
+    inputBody = request.json
+    if '@RyBot' in inputBody['text']:
+        message = _get_message(inputBody)
         body = {'bot_id': BOT_ID, 'text': message}
         requests.post(GROUPME + 'post', data=body)
     
