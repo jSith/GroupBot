@@ -18,8 +18,12 @@ def _get_message(inputBody):
     
     response_messages = ['Yes', 'No', 'Maybe', 'Alright', 'A debilitating surgery would']
     neutral_messages = ['Okay', 'Thanks', 'Try it again']
+    all_messages = response_messages + neutral_messages
+    
     message_base = ''
-    if '?' in text: 
+    if 'what can you say?' in text:
+        message_base = ', '.join(all_messages)
+    elif '?' in text: 
         message_base = choice(response_messages)
     else: 
         message_base = choice(neutral_messages)
