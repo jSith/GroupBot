@@ -16,8 +16,8 @@ def _get_message(inputBody):
     text = inputBody['text']
     name = inputBody.get('name')
     
-    response_messages = ['Yes', 'No', 'Maybe', 'A debilitating surgery would']
-    neutral_messages = ['Okay', 'Thanks']
+    response_messages = ['Yes', 'No', 'Maybe', 'Alright', 'A debilitating surgery would']
+    neutral_messages = ['Okay', 'Thanks', 'Try it again']
     message_base = ''
     if '?' in text: 
         message_base = choice(response_messages)
