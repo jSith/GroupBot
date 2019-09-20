@@ -65,8 +65,8 @@ def pastabot():
         if not message and 'random' in text:
             message = choice(pastas.values())
 
-    body = {'bot_id': pastabot_id, 'text': message}
-    requests.post(GROUPME + 'post', data=body)
+        body = {'bot_id': pastabot_id, 'text': message}
+        requests.post(GROUPME + 'post', data=body)
 
 
 if __name__ == "__main__": 
