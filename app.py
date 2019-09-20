@@ -6,7 +6,7 @@ import requests
 
 app = Flask(__name__)
 GROUPME = 'https://api.groupme.com/v3/bots/'
-
+MAX_CHARS = 1000
 
 @app.route('/api/')
 def hello_world():
@@ -31,6 +31,8 @@ def _get_message(input_body):
     message = f'Hi {name}, \n {message_base} \n - RyBot'
     return message
 
+def break_string(string):
+    return [string[i:i + MAX_CHARS] for i in range(0, len(string), MAX_CHARS)]
 
 @app.route('/api/rybot/', methods=['POST'])
 def rybot():
@@ -40,7 +42,9 @@ def rybot():
 
     if '@RyBot' in input_body["text"]:
         body = {"bot_id": rybot_id, "text": message}
-        requests.post(GROUPME + 'post', data=body)
+        resp = requests.post(GROUPME + 'post', data=body)
+        if not resp.ok:
+            raise ValueError(resp)
 
     return Response(message)
 
@@ -68,8 +72,12 @@ def pastabot():
         if not message and 'random' in text:
             message = choice(list(pastas.values()))
 
-        body = {"bot_id": pastabot_id, "text": message}
-        requests.post(GROUPME + 'post', data=body)
+        broken_string = break_string(message)
+        for string in broken_string:
+            body = {"bot_id": pastabot_id, "text": string}
+            resp = requests.post(GROUPME + 'post', data=body)
+            if not resp.ok:
+                raise ValueError(resp)
 
     return Response(message)
 
