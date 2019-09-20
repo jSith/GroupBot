@@ -60,7 +60,7 @@ def pastabot():
     if '@pastabot' in text:
         for key in pastas.keys():
             if key in text:
-                message = input_body[key]
+                message = pastas[key]
                 break
         if not message and 'random' in text:
             message = choice(list(pastas.values()))
