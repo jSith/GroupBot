@@ -1,2 +1,2 @@
 # GroupBot
-Groupme Bots
+Every day we stray further from God's light
