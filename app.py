@@ -42,7 +42,7 @@ def rybot():
         requests.post(GROUPME + 'post', data=body)
 
 
-@app.route('/api/pastabot', methods=['POST'])
+@app.route('/api/pastabot/', methods=['POST'])
 def pastabot():
     pastabot_id = ''
     pastas = {
