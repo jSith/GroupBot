@@ -71,7 +71,10 @@ def pastabot():
         'ballmer': "DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS DEVELOPERS!",
         'google': "Our mission is to organize the world's information and make it universally accessible and useful. ̷D̷o̷n̷'̷t̷ ̷b̷e̷ ̷e̷v̷i̷l̷",
         'raikes': "We are intellectually curious. We lead with humility. We express gratitude. We strive for excellence. We hold each other accountable. We build resilience. We are the Raikes School, and we are better than you.",
-        'spreetail': "Be relentless. Pursue challenges. Raise your bar. Act like an owner. Make Spreetail better. Practice humility. Fire your interns."
+        'spreetail': "Be relentless. Pursue challenges. Raise your bar. Act like an owner. Make Spreetail better. Practice humility. Fire your interns.", 
+        'tractor': "Sometimes you ride the tractor, and other times you have to shovel cow manure.", 
+        'nebraska': "Not the victory but the action. Not the goal but the game. In the humiliating loss to Ohio State the glory.", 
+        'gopack': "Hail Rodgers, full of cheese, the Lord is with thee. \n Blessed art thou among QBs, and blessed is the recipient of your catches, Davante. \n Holy Rodgers, Dad of Wisconsin, play for us sinners, now and at the hour of our loss. \n Amen"
     }
     input_body = request.json
     message = ''
