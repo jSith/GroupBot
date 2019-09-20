@@ -63,7 +63,7 @@ def pastabot():
                 message = input_body[key]
                 break
         if not message and 'random' in text:
-            message = choice(pastas.values())
+            message = choice(list(pastas.values()))
 
         body = {'bot_id': pastabot_id, 'text': message}
         requests.post(GROUPME + 'post', data=body)
