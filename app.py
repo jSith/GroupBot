@@ -12,6 +12,22 @@ MAX_CHARS = 1000
 def hello_world():
     return 'Hello, World!'
 
+@app.route('/api/keckbot/')
+def keckbot(): 
+    keckbot_id = '98a6e8591e0f1659353b463305'
+    input_body = request.json
+    possible_responses = ['on track', 'good', 'uncertain', 'chaotic', 'accelerating', 'not good', 'not on track', 'not accelerating', 'progressing', 'not progressing']
+    
+    message = f"progress is {choice(possible_responses)}."
+
+    if '@keckbot' in input_body["text"]:
+        body = {"bot_id": keckbot_id, "text": message}
+        resp = requests.post(GROUPME + 'post', data=body)
+        if not resp.ok:
+            raise ValueError(resp)
+
+    return Response(message)
+
 
 def _get_message(input_body):
     text = input_body['text']
