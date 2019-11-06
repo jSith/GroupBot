@@ -14,7 +14,7 @@ def hello_world():
 
 @app.route('/api/keckbot/')
 def keckbot(): 
-    keckbot_id = '98a6e8591e0f1659353b463305'
+    keckbot_id = "98a6e8591e0f1659353b463305"
     input_body = request.json
     possible_responses = ['on track', 'good', 'uncertain', 'chaotic', 'accelerating', 'not good', 'not on track', 'not accelerating', 'progressing', 'not progressing']
     
