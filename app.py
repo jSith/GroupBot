@@ -8,11 +8,13 @@ app = Flask(__name__)
 GROUPME = 'https://api.groupme.com/v3/bots/'
 MAX_CHARS = 1000
 
+
 @app.route('/api/')
 def hello_world():
     return 'Hello, World!'
 
-@app.route('/api/keckbot/')
+
+@app.route('/api/keckbot/', methods=['POST'])
 def keckbot(): 
     keckbot_id = "98a6e8591e0f1659353b463305"
     input_body = request.json
@@ -47,8 +49,10 @@ def _get_message(input_body):
     message = f'Hi {name}, \n {message_base} \n - RyBot'
     return message
 
+
 def break_string(string):
     return [string[i:i + MAX_CHARS] for i in range(0, len(string), MAX_CHARS)]
+
 
 @app.route('/api/rybot/', methods=['POST'])
 def rybot():
