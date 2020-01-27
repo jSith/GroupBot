@@ -72,11 +72,10 @@ def rybot():
 
 
 def _read_pastas():
-    with open(PASTA_FILE, 'r') as csv:
+    with open(PASTA_FILE, 'r', encoding='latin-1') as csv:
         content = reader(csv)
         pastas = {row[0]: row[1] for row in content}
     return pastas
-
 
 @app.route('/api/pastabot/', methods=['POST'])
 def pastabot():
