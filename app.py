@@ -72,7 +72,7 @@ def rybot():
 
 
 def _read_pastas():
-    with open(PASTA_FILE, 'r', encoding='latin-1') as csv:
+    with open(PASTA_FILE, 'r', encoding='utf-8') as csv:
         content = reader(csv)
         pastas = {row[0]: row[1] for row in content}
     return pastas
