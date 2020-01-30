@@ -77,6 +77,7 @@ def _read_pastas():
         pastas = {row[0]: row[1] for row in content}
     return pastas
 
+
 @app.route('/api/pastabot/', methods=['POST'])
 def pastabot():
     pastabot_id = 'c04d758189c5de3217830372ac'  # test
