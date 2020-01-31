@@ -10,10 +10,13 @@ import requests
 GROUPME = 'https://api.groupme.com/v3'
 GITHUB = 'https://api.github.com/repos/jSith/GroupBot'
 MAX_CHARS = 1000
-MEGACHAT_ID = 51117502
-# MEGACHAT_ID = 53735323  # test
+# MEGACHAT_ID = 51117502
+MEGACHAT_ID = 53735323  # test
 GIT_TOKEN = os.environ.get('GIT_TOKEN')
 GROUPME_TOKEN = os.environ.get('GROUPME_TOKEN')
+PASTABOT = os.environ.get('TEST_PASTABOT')
+RYBOT = os.environ.get('RYBOT')
+KECKBOT = os.environ.get('KECKBOT')
 PASTA_FILE = 'pastas.csv'
 
 app = Flask(__name__)
@@ -45,14 +48,13 @@ def _get_message(input_body):
 
 @app.route('/api/keckbot/', methods=['POST'])
 def keckbot(): 
-    keckbot_id = "98a6e8591e0f1659353b463305"
     input_body = request.json
     possible_responses = ['on track', 'good', 'uncertain', 'chaotic', 'accelerating', 'not good', 'not on track', 'not accelerating', 'progressing', 'not progressing']
     
     message = f"progress is {choice(possible_responses)}."
 
     if '@keckbot' in input_body["text"]:
-        body = {"bot_id": keckbot_id, "text": message}
+        body = {"bot_id": KECKBOT, "text": message}
         resp = requests.post(f'{GROUPME}/bots/post', data=body)
         if not resp.ok:
             raise ValueError(resp)
@@ -66,12 +68,11 @@ def break_string(string):
 
 @app.route('/api/rybot/', methods=['POST'])
 def rybot():
-    rybot_id = '918ba2a82ce55dee51f94931f2'
     input_body = request.json
     message = _get_message(input_body)
 
     if '@RyBot' in input_body["text"]:
-        body = {"bot_id": rybot_id, "text": message}
+        body = {"bot_id": RYBOT, "text": message}
         resp = requests.post(f'{GROUPME}/bots/post', data=body)
         if not resp.ok:
             raise ValueError(resp)
@@ -135,7 +136,12 @@ def _add_new_pasta(text, uid, keys):
             message = f'Could not add a pasta because I could not find your last liked message.'
             return message
         else:
-            value = last_liked_messages.pop(0)['text']
+            msg = last_liked_messages.pop(0)
+            if msg['sender_type'] == 'bot':
+                message = f'Could not add pasta because the sender of the last liked message was a bot'
+                return message
+            else:
+                value = msg['text']
 
     if '@' in value:
         message = 'Could not add pasta because you cannot be trusted with the @ character'
@@ -152,35 +158,42 @@ def _add_new_pasta(text, uid, keys):
 
 @app.route('/api/pastabot/', methods=['POST'])
 def pastabot():
-    # pastabot_id = 'c04d758189c5de3217830372ac'  # test
-    pastabot_id = '990d346038746d572fe9d6146b'
-    pastas = _read_pastas()
-
     input_body = request.json
     message = ''
     text = input_body["text"]
     uid = input_body["sender_id"]
-    keys = pastas.keys()
+    sender_type = input_body["sender_type"]
 
-    if '@pastabot' in text:
-        if 'addpasta' in text:
+    if sender_type == "bot":
+        return
+
+    pattern = re.search('^@pastabot (.*)$', text)
+
+    if pattern:
+        pastas = _read_pastas()
+        keys = pastas.keys()
+        command = pattern.group(1)
+
+        if re.search('^addpasta', command):
             try:
                 message = _add_new_pasta(text, uid, keys)
             except (KeyError, AttributeError) as e:
                 message = f'Could not add pasta because of error {e}'
-        elif 'keys' in text:
+        elif command == 'keys':
             message = ', '.join(list(pastas.keys()))
-        elif 'random' in text:
+        elif command == 'random':
             message = choice(list(pastas.values()))
         else:
             for key in keys:
-                if key in text:
+                if command == key:
                     message = pastas[key]
                     break
 
+        message = message or f'Could not find a pasta or command called {command}'
+
         broken_string = break_string(message)
         for string in broken_string:
-            body = {"bot_id": pastabot_id, "text": string}
+            body = {"bot_id": PASTABOT, "text": string}
             resp = requests.post(f'{GROUPME}/bots/post', data=body)
             if not resp.ok:
                 raise ValueError(resp)
