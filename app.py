@@ -117,7 +117,7 @@ def _add_new_pasta(text, uid, keys):
     if key in keys:
         message = f'Could not add this pasta because there is already a pasta with the key {key}.'
         return message
-    elif 'keys' in key or 'random' in key:
+    elif 'keys' in key or 'random' in key or '@' in key:
         message = f'Could not add this pasta because the key {key} is a reserved word.'
         return message
 
@@ -136,6 +136,10 @@ def _add_new_pasta(text, uid, keys):
             return message
         else:
             value = last_liked_messages.pop(0)['text']
+
+    if '@' in value:
+        message = 'Could not add pasta because you cannot be trusted with the @ character'
+        return message
 
     resp = _update_git_file(key, value)
     if not resp.ok:
