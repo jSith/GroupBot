@@ -48,7 +48,7 @@ def nukebot():
             if not resp.ok:
                 raise ValueError(resp.content)
 
-    return Response(message)
+    return Response(msg)
 
 
 def _get_message(input_body):
