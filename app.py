@@ -39,7 +39,7 @@ def nukebot():
         base = 'AND THEY DON\'T STOP COMING'
         msg = ''
         while len(msg) < (MAX_CHARS - len(base)):
-            msg = msg + base
+            msg = msg + '\n' + base
 
         body = {"bot_id": NUKEBOT, "text": msg}
         resp = requests.post(f'{GROUPME}/bots/post', data=body)
