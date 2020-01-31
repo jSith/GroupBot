@@ -44,8 +44,7 @@ def nukebot():
         body = {"bot_id": NUKEBOT, "text": msg}
         resp = requests.post(f'{GROUPME}/bots/post', data=body)
         if not resp.ok:
-            print(resp)
-            raise ValueError(resp)
+            raise ValueError(resp.content)
 
     return Response(message)
 
