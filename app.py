@@ -18,6 +18,7 @@ GROUPME_TOKEN = os.environ.get('GROUPME_TOKEN')
 PASTABOT = os.environ.get('PASTABOT')
 RYBOT = os.environ.get('RYBOT')
 KECKBOT = os.environ.get('KECKBOT')
+NUKEBOT = os.environ.get('NUKEBOT')
 PASTA_FILE = 'pastas.csv'
 
 app = Flask(__name__)
@@ -32,6 +33,28 @@ def hello_world():
 def immortalbot():
     input_body = request.json
     raise NotImplementedError(input_body)
+
+
+@app.route('/api/nukebot/', methods=['POST'])
+def nukebot():
+    input_body = request.json
+    sender_type = input_body['sender_type']
+    message = input_body['text'].lower()
+    pattern = 'and they don\'t stop coming'
+
+    if sender_type != "bot" and re.search(pattern, message):
+        base = 'AND THEY DON\'T STOP COMING'
+        msg = ''
+        while len(msg) < (MAX_CHARS - len(base)):
+            msg = msg + '\n' + base
+
+        body = {"bot_id": NUKEBOT, "text": msg}
+        for _ in range(0, 10):
+            resp = requests.post(f'{GROUPME}/bots/post', data=body)
+            if not resp.ok:
+                raise ValueError(resp.content)
+
+    return Response(message)
 
 
 def _get_message(input_body):
