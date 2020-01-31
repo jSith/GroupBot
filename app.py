@@ -38,7 +38,7 @@ def nukebot():
     if re.search(pattern, message):
         base = 'AND THEY DON\'T STOP COMING'
         msg = ''
-        while len(msg) < MAX_CHARS:
+        while len(msg) < (MAX_CHARS - len(base)):
             msg = msg + base
 
         body = {"bot_id": NUKEBOT, "text": msg}
