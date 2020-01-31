@@ -44,3 +44,7 @@ The plans that they have made?
 Because one day, I'll leave you
 A phantom to lead you in the summer
 To join the black parade"""
+recursion,"Hi, I'm pastabot! To get my attention, @me 
+ For a random pasta, enter 'random' 
+ For a list of available pastas, enter 'keys' 
+ To add a pasta, enter 'addpasta key=NEWKEY value=NEWVALUE'. You can also use the special value 'lastlikedmessage', which will make the last message you liked the value of the new pasta."
