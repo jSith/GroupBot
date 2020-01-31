@@ -87,9 +87,12 @@ def _read_pastas():
 
 
 def _update_git_file(new_key, new_value):
-    file = requests.get(f'{GITHUB}/contents/{PASTA_FILE}.csv',
-                        headers={'Authorization': f'Bearer {GIT_TOKEN}'}).json()
-    sha = file['sha']
+    resp = requests.get(f'{GITHUB}/contents/{PASTA_FILE}.csv',
+                        headers={'Authorization': f'Bearer {GIT_TOKEN}'})
+
+    if not resp.ok:
+        raise RuntimeError(resp.content)
+    sha = resp.json()['sha']
 
     with open(PASTA_FILE, 'a', encoding='utf-8') as csv:
         csvwriter = writer(csv)
