@@ -113,8 +113,14 @@ def _add_new_pasta(text, uid, keys):
 
     if 'lastlikedmessage' in value:
         last_messages = requests.get(f'{GROUPME}/groups/{MEGACHAT_ID}/messages?limit=100',
-                                     headers={'X-Access-Token': GROUPME_TOKEN}).json().get('messages')
-        last_liked_messages = list(last_messages.filter(lambda msg: uid in msg['favorited_by']))
+                                     headers={'X-Access-Token': GROUPME_TOKEN})
+        if not last_messages.ok:
+            message = f'Could not add a pasta because I could not find your last liked message. ' \
+                f'I got this error: {last_messages.content}'
+            return message
+
+        last_liked_messages = list(filter(lambda msg: uid in msg['favorited_by'],
+                                          last_messages.json()['response']['messages']))
         if not last_liked_messages:
             message = f'Could not add a pasta because I could not find your last liked message.'
             return message
@@ -139,14 +145,14 @@ def pastabot():
     input_body = request.json
     message = ''
     text = input_body["text"]
-    uid = input_body["user_id"]
+    uid = input_body["sender_id"]
     keys = pastas.keys()
 
     if '@pastabot' in text:
         if 'addpasta' in text:
             try:
                 message = _add_new_pasta(text, uid, keys)
-            except KeyError as e:
+            except (KeyError, AttributeError) as e:
                 message = f'Could not add pasta because of error {e}'
         for key in keys:
             if key in text:
