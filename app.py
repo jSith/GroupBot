@@ -103,7 +103,7 @@ def _update_git_file(new_key, new_value):
     msg = f"Add new pasta with key {new_key}"
     body = {"message": msg, "content": encoded_content, "sha": sha}
 
-    resp = requests.put(f'{GITHUB}/contents/testfile.csv',
+    resp = requests.put(f'{GITHUB}/contents/{PASTA_FILE}',
                         headers={'Authorization': f'Bearer {GIT_TOKEN}'},
                         json=body)
 
