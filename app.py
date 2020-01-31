@@ -1,5 +1,5 @@
-from base64 import b64decode, b64encode
-from csv import reader
+from base64 import b64encode
+from csv import reader, writer
 import os
 from random import choice
 import re
@@ -14,7 +14,7 @@ MAX_CHARS = 1000
 MEGACHAT_ID = 53735323  # test
 GIT_TOKEN = os.environ.get('GIT_TOKEN')
 GROUPME_TOKEN = os.environ.get('GROUPME_TOKEN')
-
+PASTA_FILE = 'testfile.csv'
 
 app = Flask(__name__)
 
@@ -79,8 +79,8 @@ def rybot():
     return Response(message)
 
 
-def _read_pastas(file='pastas.csv'):
-    with open(file, 'r', encoding='utf-8') as csv:
+def _read_pastas():
+    with open(PASTA_FILE, 'r', encoding='utf-8') as csv:
         content = reader(csv)
         pastas = {row[0]: row[1].replace("\\n", "\n") for row in content}
     return pastas
@@ -90,8 +90,14 @@ def _update_git_file(new_key, new_value):
     file = requests.get(f'{GITHUB}/contents/testfile.csv',
                         headers={'Authorization': f'Bearer {GIT_TOKEN}'}).json()
     sha = file['sha']
-    old_content = b64decode(file['content']).decode("utf-8")
-    new_content = f'{old_content} \n{new_key},{new_value}'
+
+    with open(PASTA_FILE, 'a', encoding='utf-8') as csv:
+        csvwriter = writer(csv)
+        csvwriter.writerow([new_key, new_value])
+
+    with open(PASTA_FILE, 'r', encoding='utf-8') as csv:
+        new_content = re.sub('\n', '\\n', csv.read())
+
     encoded_content = re.sub('^b\'|\'$', '', str(b64encode(new_content.encode('utf-8'))))
     msg = f"Add new pasta with key {new_key}"
     body = {"message": msg, "content": encoded_content, "sha": sha}
