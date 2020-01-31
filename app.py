@@ -7,11 +7,13 @@ import re
 from flask import Flask, request, Response
 import requests
 
-GROUPME = 'https://api.groupme.com/v3/bots/'
+GROUPME = 'https://api.groupme.com/v3'
 GITHUB = 'https://api.github.com/repos/jSith/GroupBot'
 MAX_CHARS = 1000
-PASTA_FILE = 'pastas.csv'
-GIT_TOKEN = os.environ['GIT_TOKEN']
+# MEGACHAT_ID = 51117502
+MEGACHAT_ID = 53735323
+GIT_TOKEN = os.environ.get('GIT_TOKEN')
+GROUPME_TOKEN = os.environ.get('GROUPME_TOKEN')
 
 
 app = Flask(__name__)
@@ -20,6 +22,25 @@ app = Flask(__name__)
 @app.route('/api/')
 def hello_world():
     return 'Hello, World!'
+
+
+def _get_message(input_body):
+    text = input_body['text']
+    name = input_body.get('name')
+
+    response_messages = ['Yes', 'No', 'Maybe', 'Alright', 'A debilitating surgery would']
+    neutral_messages = ['Okay', 'Thanks', 'Try it again']
+    all_messages = response_messages + neutral_messages
+
+    message_base = ''
+    if 'what can you say?' in text:
+        message_base = ', '.join(all_messages)
+    elif '?' in text:
+        message_base = choice(response_messages)
+    else:
+        message_base = choice(neutral_messages)
+    message = f'Hi {name}, \n {message_base} \n - RyBot'
+    return message
 
 
 @app.route('/api/keckbot/', methods=['POST'])
@@ -32,30 +53,11 @@ def keckbot():
 
     if '@keckbot' in input_body["text"]:
         body = {"bot_id": keckbot_id, "text": message}
-        resp = requests.post(GROUPME + 'post', data=body)
+        resp = requests.post(f'{GROUPME}/bots/post', data=body)
         if not resp.ok:
             raise ValueError(resp)
 
     return Response(message)
-
-
-def _get_message(input_body):
-    text = input_body['text']
-    name = input_body.get('name')
-    
-    response_messages = ['Yes', 'No', 'Maybe', 'Alright', 'A debilitating surgery would']
-    neutral_messages = ['Okay', 'Thanks', 'Try it again']
-    all_messages = response_messages + neutral_messages
-    
-    message_base = ''
-    if 'what can you say?' in text:
-        message_base = ', '.join(all_messages)
-    elif '?' in text: 
-        message_base = choice(response_messages)
-    else: 
-        message_base = choice(neutral_messages)
-    message = f'Hi {name}, \n {message_base} \n - RyBot'
-    return message
 
 
 def break_string(string):
@@ -70,34 +72,62 @@ def rybot():
 
     if '@RyBot' in input_body["text"]:
         body = {"bot_id": rybot_id, "text": message}
-        resp = requests.post(GROUPME + 'post', data=body)
+        resp = requests.post(f'{GROUPME}/bots/post', data=body)
         if not resp.ok:
             raise ValueError(resp)
 
     return Response(message)
 
 
-def _read_pastas():
-    with open(PASTA_FILE, 'r', encoding='utf-8') as csv:
+def _read_pastas(file='pastas.csv'):
+    with open(file, 'r', encoding='utf-8') as csv:
         content = reader(csv)
         pastas = {row[0]: row[1].replace("\\n", "\n") for row in content}
     return pastas
 
 
 def _update_git_file(new_key, new_value):
-    file = requests.get(f'{GITHUB}/contents/newfile.txt',
+    file = requests.get(f'{GITHUB}/contents/testfile.csv',
                         headers={'Authorization': f'Bearer {GIT_TOKEN}'}).json()
     sha = file['sha']
     old_content = b64decode(file['content']).decode("utf-8")
-    new_content = f'{old_content} \n {new_key}, {new_value}'
+    new_content = f'{old_content} \n{new_key},{new_value}'
     encoded_content = re.sub('^b\'|\'$', '', str(b64encode(new_content.encode('utf-8'))))
     msg = f"Add new pasta with key {new_key}"
     body = {"message": msg, "content": encoded_content, "sha": sha}
 
-    resp = requests.put(f'{GITHUB}/contents/newfile.txt',
+    resp = requests.put(f'{GITHUB}/contents/testfile.csv',
                         headers={'Authorization': f'Bearer {GIT_TOKEN}'},
                         json=body)
-    print(resp.content)
+
+    return resp
+
+
+def _add_new_pasta(text, uid, keys):
+    key = re.search('key=(.*) value=', text).group(1)
+    value = re.search('value=(.*)', text).group(1)
+
+    if key in keys:
+        message = f'Could not add this pasta because there is already a pasta with the key {key}.'
+        return message
+
+    if 'lastlikedmessage' in value:
+        last_messages = requests.get(f'{GROUPME}/groups/{MEGACHAT_ID}/messages?limit=100',
+                                     headers={'X-Access-Token': GROUPME_TOKEN}).json().get('messages')
+        last_liked_messages = list(last_messages.filter(lambda msg: uid in msg['favorited_by']))
+        if not last_liked_messages:
+            message = f'Could not add a pasta because I could not find your last liked message.'
+            return message
+        else:
+            value = last_liked_messages.pop(0)['text']
+
+    resp = _update_git_file(key, value)
+    if not resp.ok:
+        message = f'Could not add a pasta because there was an error with the Github API: {resp.content}'
+    else:
+        message = f'Successfully added pasta with key {key} and value {value}'
+
+    return message
 
 
 @app.route('/api/pastabot/', methods=['POST'])
@@ -109,9 +139,16 @@ def pastabot():
     input_body = request.json
     message = ''
     text = input_body["text"]
+    uid = input_body["user_id"]
+    keys = pastas.keys()
 
     if '@pastabot' in text:
-        for key in pastas.keys():
+        if 'addpasta' in text:
+            try:
+                message = _add_new_pasta(text, uid, keys)
+            except KeyError as e:
+                message = f'Could not add pasta because of error {e}'
+        for key in keys:
             if key in text:
                 message = pastas[key]
                 break
@@ -123,7 +160,7 @@ def pastabot():
         broken_string = break_string(message)
         for string in broken_string:
             body = {"bot_id": pastabot_id, "text": string}
-            resp = requests.post(GROUPME + 'post', data=body)
+            resp = requests.post(f'{GROUPME}/bots/post', data=body)
             if not resp.ok:
                 raise ValueError(resp)
 
@@ -131,6 +168,5 @@ def pastabot():
 
 
 if __name__ == "__main__":
-    _update_git_file(new_key='testkey', new_value='testvalue')
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
