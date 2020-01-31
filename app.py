@@ -18,6 +18,7 @@ GROUPME_TOKEN = os.environ.get('GROUPME_TOKEN')
 PASTABOT = os.environ.get('PASTABOT')
 RYBOT = os.environ.get('RYBOT')
 KECKBOT = os.environ.get('KECKBOT')
+NUKEBOT = os.environ.get('NUKEBOT')
 PASTA_FILE = 'pastas.csv'
 
 app = Flask(__name__)
@@ -26,6 +27,26 @@ app = Flask(__name__)
 @app.route('/api/')
 def hello_world():
     return 'Hello, World!'
+
+
+@app.route('/api/nukebot/', methods=['POST'])
+def nukebot():
+    input_body = request.json
+    message = input_body['text'].lower()
+    pattern = 'and they don\'t stop coming'
+
+    if re.search(pattern, message):
+        base = 'AND THEY DON\'T STOP COMING'
+        msg = ''
+        while len(msg) < MAX_CHARS:
+            msg = msg + base
+
+        body = {"bot_id": NUKEBOT, "text": msg}
+        resp = requests.post(f'{GROUPME}/bots/post', data=body)
+        if not resp.ok:
+            raise ValueError(resp)
+
+    return Response(message)
 
 
 def _get_message(input_body):
