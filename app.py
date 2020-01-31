@@ -32,7 +32,26 @@ def hello_world():
 @app.route('/api/immortalbot/')
 def immortalbot():
     input_body = request.json
-    raise NotImplementedError(input_body)
+    sender = input_body.get('sender_type')
+    event = input_body.get('event')
+    group_id = input_body.get('group_id')
+
+    if not event or sender != 'system':
+        return
+
+    event_type = event['type']
+    if event_type == 'membership.notifications.removed' or event_type == 'membership.notifications.exited':
+        removed_user = event['data']['removed_user']
+        nickname = removed_user.get('nickname')
+        uid = removed_user.get('id')
+        data = {"nickname": f'Immortal {nickname}', "user_id": uid}
+        resp = requests.post(f'{GROUPME}/{group_id}/members/add',
+                             headers={'X-Access-Token': GROUPME_TOKEN},
+                             json=data)
+        if not resp.ok:
+            raise ConnectionError(f'Problem with Groupme API {resp.content}')
+
+    return Response('ok')
 
 
 @app.route('/api/nukebot/', methods=['POST'])
