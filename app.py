@@ -1,5 +1,6 @@
 from base64 import b64encode
 from csv import reader, writer
+from difflib import get_close_matches
 import os
 from random import choice
 import re
@@ -171,16 +172,19 @@ def pastabot():
 
     if pattern:
         pastas = _read_pastas()
-        keys = pastas.keys()
+        keys = list(pastas.keys())
         command = pattern.group(1)
 
         if re.search('^addpasta', command):
-            try:
-                message = _add_new_pasta(text, uid, keys)
-            except (KeyError, AttributeError) as e:
-                message = f'Could not add pasta because of error {e}'
+            if not re.search('^addpasta key=(.*) value=(.*)$', command):
+                message = 'Could not add pasta because the addpasta command was incorrectly formatted.'
+            else:
+                try:
+                    message = _add_new_pasta(text, uid, keys)
+                except (KeyError, AttributeError) as e:
+                    message = f'Could not add pasta because of error {e}'
         elif command == 'keys':
-            message = ', '.join(list(pastas.keys()))
+            message = ', '.join(keys)
         elif command == 'random':
             message = choice(list(pastas.values()))
         else:
@@ -189,7 +193,12 @@ def pastabot():
                     message = pastas[key]
                     break
 
-        message = message or f'Could not find a pasta or command called {command}'
+        if not message:
+            keys.extend(['keys', 'random', 'addpasta'])
+            message = f'Could not find a pasta or command called {command}.'
+            nearest_match = get_close_matches(command, keys)
+            if nearest_match:
+                message = message + f' Did you mean {nearest_match[0]}?'
 
         broken_string = break_string(message)
         for string in broken_string:
