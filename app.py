@@ -10,8 +10,8 @@ import requests
 GROUPME = 'https://api.groupme.com/v3'
 GITHUB = 'https://api.github.com/repos/jSith/GroupBot'
 MAX_CHARS = 1000
-# MEGACHAT_ID = 51117502
-MEGACHAT_ID = 53735323  # test
+MEGACHAT_ID = 51117502
+# MEGACHAT_ID = 53735323  # test
 GIT_TOKEN = os.environ.get('GIT_TOKEN')
 GROUPME_TOKEN = os.environ.get('GROUPME_TOKEN')
 PASTA_FILE = 'pastas.csv'
@@ -148,8 +148,8 @@ def _add_new_pasta(text, uid, keys):
 
 @app.route('/api/pastabot/', methods=['POST'])
 def pastabot():
-    pastabot_id = 'c04d758189c5de3217830372ac'  # test
-    # pastabot_id = '990d346038746d572fe9d6146b'
+    # pastabot_id = 'c04d758189c5de3217830372ac'  # test
+    pastabot_id = '990d346038746d572fe9d6146b'
     pastas = _read_pastas()
 
     input_body = request.json
