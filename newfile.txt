@@ -1,8 +1,0 @@
-b'content content \ntest test\nboo\n' 
- testkey, testvalue 
- testkey, testvalue 
- testkey, testvalue 
- testkey, testvalue 
- testkey, testvalue 
- testkey, testvalue 
- testkey, testvalue
