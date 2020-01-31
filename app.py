@@ -14,7 +14,7 @@ MAX_CHARS = 1000
 MEGACHAT_ID = 53735323  # test
 GIT_TOKEN = os.environ.get('GIT_TOKEN')
 GROUPME_TOKEN = os.environ.get('GROUPME_TOKEN')
-PASTA_FILE = 'testfile.csv'
+PASTA_FILE = 'pastas.csv'
 
 app = Flask(__name__)
 
