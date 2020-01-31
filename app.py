@@ -29,9 +29,7 @@ def hello_world():
     return 'Hello, World!'
 
 
-@app.route('/api/immortalbot/')
-def immortalbot():
-    input_body = request.json
+def immortal(input_body):
     sender = input_body.get('sender_type')
     event = input_body.get('event')
     group_id = input_body.get('group_id')
@@ -40,23 +38,26 @@ def immortalbot():
         return
 
     event_type = event['type']
-    if event_type == 'membership.notifications.removed' or event_type == 'membership.notifications.exited':
+    if event_type == 'membership.notifications.removed':
         removed_user = event['data']['removed_user']
         nickname = removed_user.get('nickname')
         uid = removed_user.get('id')
-        data = {"nickname": f'Immortal {nickname}', "user_id": uid}
-        resp = requests.post(f'{GROUPME}/{group_id}/members/add',
+        data = {"members": [{"nickname": f'Immortal {nickname}', "user_id": uid}]}
+        resp = requests.post(f'{GROUPME}/groups/{group_id}/members/add',
                              headers={'X-Access-Token': GROUPME_TOKEN},
                              json=data)
         if not resp.ok:
             raise ConnectionError(f'Problem with Groupme API {resp.content}')
 
-    return Response('ok')
+        return True
 
 
 @app.route('/api/nukebot/', methods=['POST'])
 def nukebot():
     input_body = request.json
+    if immortal(input_body):
+        return Response('user saved')
+
     sender_type = input_body['sender_type']
     message = input_body['text'].lower()
     pattern = 'and they don\'t stop coming'
@@ -98,6 +99,9 @@ def _get_message(input_body):
 @app.route('/api/keckbot/', methods=['POST'])
 def keckbot(): 
     input_body = request.json
+    if immortal(input_body):
+        return Response('user saved')
+
     possible_responses = ['on track', 'good', 'uncertain', 'chaotic', 'accelerating', 'not good', 'not on track', 'not accelerating', 'progressing', 'not progressing']
     
     message = f"progress is {choice(possible_responses)}."
@@ -119,6 +123,8 @@ def break_string(string):
 def rybot():
     input_body = request.json
     message = _get_message(input_body)
+    if immortal(input_body):
+        return Response('user saved')
 
     if '@RyBot' in input_body["text"]:
         body = {"bot_id": RYBOT, "text": message}
@@ -208,6 +214,9 @@ def _add_new_pasta(text, uid, keys):
 @app.route('/api/pastabot/', methods=['POST'])
 def pastabot():
     input_body = request.json
+    if immortal(input_body):
+        return Response('user saved')
+
     message = ''
     text = input_body["text"]
     uid = input_body["sender_id"]
