@@ -1,12 +1,14 @@
+from base64 import b64decode, b64encode
 from csv import reader
 import os
 from random import choice
+import re
 
 from flask import Flask, request, Response
 import requests
 
 GROUPME = 'https://api.groupme.com/v3/bots/'
-GITHUB = 'https://api.github.com/repos/jSith/GroupBot/'
+GITHUB = 'https://api.github.com/repos/jSith/GroupBot'
 MAX_CHARS = 1000
 PASTA_FILE = 'pastas.csv'
 GIT_TOKEN = os.environ['GIT_TOKEN']
@@ -82,12 +84,20 @@ def _read_pastas():
     return pastas
 
 
-def _update_git_file():
-    file = requests.get(f'{GITHUB}contents/testfile.txt',
+def _update_git_file(new_key, new_value):
+    file = requests.get(f'{GITHUB}/contents/newfile.txt',
                         headers={'Authorization': f'Bearer {GIT_TOKEN}'}).json()
     sha = file['sha']
-    old_content = file['content']
+    old_content = b64decode(file['content']).decode("utf-8")
+    new_content = f'{old_content} \n {new_key}, {new_value}'
+    encoded_content = re.sub('^b\'|\'$', '', str(b64encode(new_content.encode('utf-8'))))
+    msg = f"Add new pasta with key {new_key}"
+    body = {"message": msg, "content": encoded_content, "sha": sha}
 
+    resp = requests.put(f'{GITHUB}/contents/newfile.txt',
+                        headers={'Authorization': f'Bearer {GIT_TOKEN}'},
+                        json=body)
+    print(resp.content)
 
 
 @app.route('/api/pastabot/', methods=['POST'])
@@ -121,5 +131,6 @@ def pastabot():
 
 
 if __name__ == "__main__":
+    _update_git_file(new_key='testkey', new_value='testvalue')
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
