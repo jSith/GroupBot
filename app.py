@@ -28,6 +28,12 @@ def hello_world():
     return 'Hello, World!'
 
 
+@app.route('/api/immortalbot/')
+def immortalbot():
+    input_body = request.json
+    raise NotImplementedError(input_body)
+
+
 def _get_message(input_body):
     text = input_body['text']
     name = input_body.get('name')
