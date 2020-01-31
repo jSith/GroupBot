@@ -11,7 +11,7 @@ GROUPME = 'https://api.groupme.com/v3'
 GITHUB = 'https://api.github.com/repos/jSith/GroupBot'
 MAX_CHARS = 1000
 # MEGACHAT_ID = 51117502
-MEGACHAT_ID = 53735323
+MEGACHAT_ID = 53735323  # test
 GIT_TOKEN = os.environ.get('GIT_TOKEN')
 GROUPME_TOKEN = os.environ.get('GROUPME_TOKEN')
 
@@ -110,6 +110,9 @@ def _add_new_pasta(text, uid, keys):
     if key in keys:
         message = f'Could not add this pasta because there is already a pasta with the key {key}.'
         return message
+    elif 'keys' in key or 'random' in key:
+        message = f'Could not add this pasta because the key {key} is a reserved word.'
+        return message
 
     if 'lastlikedmessage' in value:
         last_messages = requests.get(f'{GROUPME}/groups/{MEGACHAT_ID}/messages?limit=100',
@@ -154,14 +157,15 @@ def pastabot():
                 message = _add_new_pasta(text, uid, keys)
             except (KeyError, AttributeError) as e:
                 message = f'Could not add pasta because of error {e}'
-        for key in keys:
-            if key in text:
-                message = pastas[key]
-                break
-        if not message and 'random' in text:
-            message = choice(list(pastas.values()))
-        elif not message and 'keys' in text:
+        elif 'keys' in text:
             message = ', '.join(list(pastas.keys()))
+        elif 'random' in text:
+            message = choice(list(pastas.values()))
+        else:
+            for key in keys:
+                if key in text:
+                    message = pastas[key]
+                    break
 
         broken_string = break_string(message)
         for string in broken_string:
