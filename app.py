@@ -5,10 +5,14 @@ from random import choice
 from flask import Flask, request, Response
 import requests
 
-app = Flask(__name__)
 GROUPME = 'https://api.groupme.com/v3/bots/'
+GITHUB = 'https://api.github.com/repos/jSith/GroupBot/'
 MAX_CHARS = 1000
 PASTA_FILE = 'pastas.csv'
+GIT_TOKEN = os.environ['GIT_TOKEN']
+
+
+app = Flask(__name__)
 
 
 @app.route('/api/')
@@ -76,6 +80,14 @@ def _read_pastas():
         content = reader(csv)
         pastas = {row[0]: row[1].replace("\\n", "\n") for row in content}
     return pastas
+
+
+def _update_git_file():
+    file = requests.get(f'{GITHUB}contents/testfile.txt',
+                        headers={'Authorization': f'Bearer {GIT_TOKEN}'}).json()
+    sha = file['sha']
+    old_content = file['content']
+
 
 
 @app.route('/api/pastabot/', methods=['POST'])
