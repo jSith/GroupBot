@@ -225,7 +225,7 @@ def pastabot():
     if sender_type == "bot":
         return
 
-    pattern = re.search('^@pastabot (.*)$', text)
+    pattern = re.search('@pastabot (.*)$', text)
 
     if pattern:
         pastas = _read_pastas()
