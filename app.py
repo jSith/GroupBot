@@ -57,10 +57,10 @@ def nukebot():
     input_body = request.json
     sender_type = input_body['sender_type']
     message = input_body['text'].lower()
-    pattern = 'and they don\'t stop coming'
+    pattern = 'and they don\'t stop comin'
 
     if  re.search(pattern, message):
-        base = 'AND THEY DON\'T STOP COMIN'
+        base = 'AND THEY DON\'T STOP COMING'
         msg = base
         while len(msg) < (MAX_CHARS - len(base)):
             msg = msg + '\n' + base
