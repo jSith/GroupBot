@@ -62,17 +62,16 @@ def nukebot():
     message = input_body['text'].lower()
     pattern = 'and they don\'t stop coming'
 
-    if sender_type != "bot" and re.search(pattern, message):
-        base = 'AND THEY DON\'T STOP COMING'
-        msg = ''
+    if  re.search(pattern, message):
+        base = 'AND THEY DON\'T STOP COMIN'
+        msg = base
         while len(msg) < (MAX_CHARS - len(base)):
             msg = msg + '\n' + base
 
         body = {"bot_id": NUKEBOT, "text": msg}
-        for _ in range(0, 10):
-            resp = requests.post(f'{GROUPME}/bots/post', data=body)
-            if not resp.ok:
-                raise ValueError(resp.content)
+        resp = requests.post(f'{GROUPME}/bots/post', data=body)
+        if not resp.ok:
+            raise ValueError(resp.content)
 
     return Response(message)
 
