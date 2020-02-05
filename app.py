@@ -55,9 +55,6 @@ def immortal(input_body):
 @app.route('/api/nukebot/', methods=['POST'])
 def nukebot():
     input_body = request.json
-    if immortal(input_body):
-        return Response('user saved')
-
     sender_type = input_body['sender_type']
     message = input_body['text'].lower()
     pattern = 'and they don\'t stop coming'
