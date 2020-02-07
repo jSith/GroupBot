@@ -16,6 +16,7 @@ MEGACHAT_ID = 51117502
 GIT_TOKEN = os.environ.get('GIT_TOKEN')
 GROUPME_TOKEN = os.environ.get('GROUPME_TOKEN')
 PASTABOT = os.environ.get('PASTABOT')
+TEST_PASTABOT = os.environ.get('TEST_PASTABOT')
 RYBOT = os.environ.get('RYBOT')
 KECKBOT = os.environ.get('KECKBOT')
 NUKEBOT = os.environ.get('NUKEBOT')
@@ -55,11 +56,10 @@ def immortal(input_body):
 @app.route('/api/nukebot/', methods=['POST'])
 def nukebot():
     input_body = request.json
-    sender_type = input_body['sender_type']
     message = input_body['text'].lower()
     pattern = 'and they don\'t stop comin'
 
-    if  re.search(pattern, message):
+    if re.search(pattern, message):
         base = 'AND THEY DON\'T STOP COMING'
         msg = base
         while len(msg) < (MAX_CHARS - len(base)):
@@ -210,8 +210,9 @@ def _add_new_pasta(text, uid, keys):
 @app.route('/api/pastabot/', methods=['POST'])
 def pastabot():
     input_body = request.json
-    if immortal(input_body):
-        return Response('user saved')
+
+    if request.args.get('test'):
+        raise ValueError('ope')
 
     message = ''
     text = input_body["text"]
