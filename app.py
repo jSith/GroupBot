@@ -170,9 +170,11 @@ def _update_git_file(new_values):
     return resp
 
 
-def _add_new_pasta(text, uid, keys):
+def _add_new_pasta(text, uid, keys, attachments):
     key = re.search('key=(.*) value=', text).group(1)
     value = re.search('value=(.*)', text).group(1)
+    img = None
+
     new_info = [key]  # used to write to the git file -- should be either [key, value, img] or [key, value] at the end
 
     if key in keys:
@@ -209,6 +211,17 @@ def _add_new_pasta(text, uid, keys):
                     new_info.append(img)
     else:
         new_info.append(value)
+        if attachments and attachments[0]['type'] == "image":
+            img = attachments[0]["url"]
+            new_info.append(img)
+
+    if '@' in value:
+        message = 'Could not add pasta because you cannot be trusted with the @ character'
+        return message
+
+    if not value and not img:
+        message = f'Could not add a pasta because it was empty.'
+        return message
 
     resp = _update_git_file(new_info)
     if not resp.ok:
@@ -219,7 +232,7 @@ def _add_new_pasta(text, uid, keys):
     return message
 
 
-def _get_pastabot_message(command, uid):
+def _get_pastabot_message(command, uid, attachments):
     pastas = _read_pastas()
     keys = list(pastas.keys())
     message = ''
@@ -230,7 +243,7 @@ def _get_pastabot_message(command, uid):
             message = 'Could not add pasta because the addpasta command was incorrectly formatted.'
         else:
             try:
-                message = _add_new_pasta(command, uid, keys)
+                message = _add_new_pasta(command, uid, keys, attachments)
             except (KeyError, AttributeError) as e:
                 message = f'Could not add pasta because of error {e}'
     elif command == 'keys':
@@ -266,6 +279,7 @@ def pastabot():
     text = input_body["text"]
     uid = input_body["sender_id"]
     sender_type = input_body["sender_type"]
+    attachments = input_body.get('attachments')
 
     if sender_type == "bot":
         return Response()
@@ -276,7 +290,7 @@ def pastabot():
         return Response()
 
     command = pattern.group(1)
-    message, img_url = _get_pastabot_message(command, uid)
+    message, img_url = _get_pastabot_message(command, uid, attachments)
 
     broken_string = break_string(message)
     for string in broken_string:
