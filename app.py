@@ -244,7 +244,7 @@ def _get_pastabot_message(command, uid):
                 img_url = pastas[key]["img_url"]
                 break
 
-    if not message:
+    if not message and not img_url:
         keys.extend(['keys', 'random', 'addpasta'])
         message = f'Could not find a pasta or command called {command}.'
         nearest_match = get_close_matches(command, keys)
