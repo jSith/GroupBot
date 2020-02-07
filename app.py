@@ -137,7 +137,7 @@ def _read_pastas():
         pastas = {}
         for row in content:
             key = row[0]
-            text = row[1]
+            text = row[1].replace("\\n", "\n")
             try:
                 img_url = row[2]
             except IndexError:
