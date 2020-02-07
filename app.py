@@ -73,25 +73,6 @@ def nukebot():
     return Response(message)
 
 
-def _get_message(input_body):
-    text = input_body['text']
-    name = input_body.get('name')
-
-    response_messages = ['Yes', 'No', 'Maybe', 'Alright', 'A debilitating surgery would']
-    neutral_messages = ['Okay', 'Thanks', 'Try it again']
-    all_messages = response_messages + neutral_messages
-
-    message_base = ''
-    if 'what can you say?' in text:
-        message_base = ', '.join(all_messages)
-    elif '?' in text:
-        message_base = choice(response_messages)
-    else:
-        message_base = choice(neutral_messages)
-    message = f'Hi {name}, \n {message_base} \n - RyBot'
-    return message
-
-
 @app.route('/api/keckbot/', methods=['POST'])
 def keckbot(): 
     input_body = request.json
@@ -115,10 +96,29 @@ def break_string(string):
     return [string[i:i + MAX_CHARS] for i in range(0, len(string), MAX_CHARS)]
 
 
+def _get_rybot_message(input_body):
+    text = input_body['text']
+    name = input_body.get('name')
+
+    response_messages = ['Yes', 'No', 'Maybe', 'Alright', 'A debilitating surgery would']
+    neutral_messages = ['Okay', 'Thanks', 'Try it again']
+    all_messages = response_messages + neutral_messages
+
+    message_base = ''
+    if 'what can you say?' in text:
+        message_base = ', '.join(all_messages)
+    elif '?' in text:
+        message_base = choice(response_messages)
+    else:
+        message_base = choice(neutral_messages)
+    message = f'Hi {name}, \n {message_base} \n - RyBot'
+    return message
+
+
 @app.route('/api/rybot/', methods=['POST'])
 def rybot():
     input_body = request.json
-    message = _get_message(input_body)
+    message = _get_rybot_message(input_body)
     if immortal(input_body):
         return Response('user saved')
 
@@ -134,11 +134,19 @@ def rybot():
 def _read_pastas():
     with open(PASTA_FILE, 'r', encoding='utf-8') as csv:
         content = reader(csv)
-        pastas = {row[0]: row[1].replace("\\n", "\n") for row in content}
+        pastas = {}
+        for row in content:
+            key = row[0]
+            text = row[1]
+            try:
+                img_url = row[2]
+            except IndexError:
+                img_url = ''
+            pastas[key] = {"text": text, "img_url": img_url}
     return pastas
 
 
-def _update_git_file(new_key, new_value):
+def _update_git_file(new_values):
     file = requests.get(f'{GITHUB}/contents/{PASTA_FILE}',
                         headers={'Authorization': f'Bearer {GIT_TOKEN}'}).json()
 
@@ -146,13 +154,13 @@ def _update_git_file(new_key, new_value):
 
     with open(PASTA_FILE, 'a', encoding='utf-8') as csv:
         csvwriter = writer(csv)
-        csvwriter.writerow([new_key, new_value])
+        csvwriter.writerow(new_values)
 
     with open(PASTA_FILE, 'r', encoding='utf-8') as csv:
         new_content = re.sub('\n', '\\n', csv.read())
 
     encoded_content = re.sub('^b\'|\'$', '', str(b64encode(new_content.encode('utf-8'))))
-    msg = f"Add new pasta with key {new_key}"
+    msg = f"Add new pasta with key {new_values[0]}"
     body = {"message": msg, "content": encoded_content, "sha": sha}
 
     resp = requests.put(f'{GITHUB}/contents/{PASTA_FILE}',
@@ -165,15 +173,16 @@ def _update_git_file(new_key, new_value):
 def _add_new_pasta(text, uid, keys):
     key = re.search('key=(.*) value=', text).group(1)
     value = re.search('value=(.*)', text).group(1)
+    new_info = [key]  # used to write to the git file -- should be either [key, value, img] or [key, value] at the end
 
     if key in keys:
         message = f'Could not add this pasta because there is already a pasta with the key {key}.'
         return message
-    elif 'keys' in key or 'random' in key or '@' in key:
+    elif 'keys' in key or 'random' in key:
         message = f'Could not add this pasta because the key {key} is a reserved word.'
         return message
 
-    if 'lastlikedmessage' in value:
+    if 'lastlikedmessage' == value:
         last_messages = requests.get(f'{GROUPME}/groups/{MEGACHAT_ID}/messages?limit=100',
                                      headers={'X-Access-Token': GROUPME_TOKEN})
         if not last_messages.ok:
@@ -193,18 +202,56 @@ def _add_new_pasta(text, uid, keys):
                 return message
             else:
                 value = msg['text']
+                new_info.append(value)
+                attachments = msg.get('attachments')
+                if attachments and attachments[0]['type'] == "image":
+                    img = attachments[0]["url"]
+                    new_info.append(img)
+    else:
+        new_info.append(value)
 
-    if '@' in value:
-        message = 'Could not add pasta because you cannot be trusted with the @ character'
-        return message
-
-    resp = _update_git_file(key, value)
+    resp = _update_git_file(new_info)
     if not resp.ok:
         message = f'Could not add a pasta because there was an error with the Github API: {resp.content}'
     else:
         message = f'Successfully added pasta with key {key} and value {value}'
 
     return message
+
+
+def _get_pastabot_message(command, uid):
+    pastas = _read_pastas()
+    keys = list(pastas.keys())
+    message = ''
+    img_url = ''
+
+    if re.search('^addpasta', command):
+        if not re.search('^addpasta key=(.*) value=(.*)$', command):
+            message = 'Could not add pasta because the addpasta command was incorrectly formatted.'
+        else:
+            try:
+                message = _add_new_pasta(command, uid, keys)
+            except (KeyError, AttributeError) as e:
+                message = f'Could not add pasta because of error {e}'
+    elif command == 'keys':
+        message = ', '.join(keys)
+    elif command == 'random':
+        message = choice(list(pastas.values()))
+    else:
+        for key in keys:
+            if command == key:
+                message = pastas[key]["text"]
+                img_url = pastas[key]["img_url"]
+                break
+
+    if not message:
+        keys.extend(['keys', 'random', 'addpasta'])
+        message = f'Could not find a pasta or command called {command}.'
+        nearest_match = get_close_matches(command, keys)
+        if nearest_match:
+            message = message + f' Did you mean {nearest_match[0]}?'
+
+    return message, img_url
 
 
 @app.route('/api/pastabot/', methods=['POST'])
@@ -216,56 +263,35 @@ def pastabot():
     else:
         bot_id = PASTABOT
 
-    message = ''
     text = input_body["text"]
     uid = input_body["sender_id"]
     sender_type = input_body["sender_type"]
 
     if sender_type == "bot":
-        return
+        return Response()
 
     pattern = re.search('@pastabot (.*)$', text)
 
-    if pattern:
-        pastas = _read_pastas()
-        keys = list(pastas.keys())
-        command = pattern.group(1)
+    if not pattern:
+        return Response()
 
-        if re.search('^addpasta', command):
-            if not re.search('^addpasta key=(.*) value=(.*)$', command):
-                message = 'Could not add pasta because the addpasta command was incorrectly formatted.'
-            else:
-                try:
-                    message = _add_new_pasta(text, uid, keys)
-                except (KeyError, AttributeError) as e:
-                    message = f'Could not add pasta because of error {e}'
-        elif command == 'keys':
-            message = ', '.join(keys)
-        elif command == 'random':
-            message = choice(list(pastas.values()))
-        else:
-            for key in keys:
-                if command == key:
-                    message = pastas[key]
-                    break
+    command = pattern.group(1)
+    message, img_url = _get_pastabot_message(command, uid)
 
-        if not message:
-            keys.extend(['keys', 'random', 'addpasta'])
-            message = f'Could not find a pasta or command called {command}.'
-            nearest_match = get_close_matches(command, keys)
-            if nearest_match:
-                message = message + f' Did you mean {nearest_match[0]}?'
+    broken_string = break_string(message)
+    for string in broken_string:
+        body = {"bot_id": bot_id, "text": string}
+        resp = requests.post(f'{GROUPME}/bots/post', data=body)
+        if not resp.ok:
+            raise ValueError(resp)
 
-        broken_string = break_string(message)
-        for string in broken_string:
-            body = {"bot_id": bot_id, "text": string}
-            resp = requests.post(f'{GROUPME}/bots/post', data=body)
-            if not resp.ok:
-                raise ValueError(resp)
+    if img_url:
+        body = {"bot_id": bot_id, "picture_url": img_url}
 
     return Response(message)
 
 
 if __name__ == "__main__":
+    print(_read_pastas())
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
