@@ -295,6 +295,5 @@ def pastabot():
 
 
 if __name__ == "__main__":
-    print(_read_pastas())
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
