@@ -180,7 +180,7 @@ def _add_new_pasta(text, uid, keys, attachments):
     if key in keys:
         message = f'Could not add this pasta because there is already a pasta with the key {key}.'
         return message
-    elif 'keys' in key or 'random' in key:
+    elif 'keys' in key or 'random' in key or 'addpasta' in key:
         message = f'Could not add this pasta because the key {key} is a reserved word.'
         return message
 
