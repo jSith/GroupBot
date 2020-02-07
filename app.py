@@ -212,7 +212,9 @@ def pastabot():
     input_body = request.json
 
     if request.args.get('test'):
-        raise ValueError('ope')
+        bot_id = TEST_PASTABOT
+    else:
+        bot_id = PASTABOT
 
     message = ''
     text = input_body["text"]
@@ -256,7 +258,7 @@ def pastabot():
 
         broken_string = break_string(message)
         for string in broken_string:
-            body = {"bot_id": PASTABOT, "text": string}
+            body = {"bot_id": bot_id, "text": string}
             resp = requests.post(f'{GROUPME}/bots/post', data=body)
             if not resp.ok:
                 raise ValueError(resp)
