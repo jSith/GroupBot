@@ -20,6 +20,7 @@ TEST_PASTABOT = os.environ.get('TEST_PASTABOT')
 RYBOT = os.environ.get('RYBOT')
 KECKBOT = os.environ.get('KECKBOT')
 NUKEBOT = os.environ.get('NUKEBOT')
+NUKE_SENDER = os.environ.get('NUKE_SENDER')
 PASTA_FILE = 'pastas.csv'
 
 app = Flask(__name__)
@@ -56,19 +57,18 @@ def immortal(input_body):
 @app.route('/api/nukebot/', methods=['POST'])
 def nukebot():
     input_body = request.json
-    message = input_body['text'].lower()
-    pattern = 'and they don\'t stop comin'
+    message = input_body['text']
+    sender = input_body['sender_id']
 
-    if re.search(pattern, message):
-        base = 'AND THEY DON\'T STOP COMING'
-        msg = base
-        while len(msg) < (MAX_CHARS - len(base)):
-            msg = msg + '\n' + base
+    if sender == NUKE_SENDER:
+        text = ''.join([message] * 100)
+        broken_strings = break_string(text)
 
-        body = {"bot_id": NUKEBOT, "text": msg}
-        resp = requests.post(f'{GROUPME}/bots/post', data=body)
-        if not resp.ok:
-            raise ValueError(resp.content)
+        for string in broken_strings:
+            body = {"bot_id": NUKEBOT, "text": string}
+            resp = requests.post(f'{GROUPME}/bots/post', data=body)
+            if not resp.ok:
+                raise ValueError(resp.content)
 
     return Response(message)
 
@@ -216,6 +216,7 @@ def _add_new_pasta(text, uid, keys, attachments):
             new_info.append(img)
 
     if '@' in value:
+
         message = 'Could not add pasta because you cannot be trusted with the @ character'
         return message
 
