@@ -37,6 +37,11 @@ def hello_world():
 def dadbot():
     input_body = request.json
     text = input_body['text']
+    sender_type = input_body["sender_type"]
+
+    if sender_type == "bot":
+        return Response()
+    
     message = ''
 
     if 'dadbot tell a joke' in text:
