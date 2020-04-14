@@ -1,5 +1,5 @@
 from base64 import b64encode
-from csv import reader, writer
+from csv import reader, writer, DictReader
 from difflib import get_close_matches
 import os
 from random import choice
@@ -20,8 +20,10 @@ TEST_PASTABOT = os.environ.get('TEST_PASTABOT')
 RYBOT = os.environ.get('RYBOT')
 KECKBOT = os.environ.get('KECKBOT')
 NUKEBOT = os.environ.get('NUKEBOT')
+DADBOT = os.environ.get('DADBOT')
 NUKE_SENDER = os.environ.get('NUKE_SENDER')
 PASTA_FILE = 'pastas.csv'
+DADJOKE_FILE = 'dadjokes.csv'
 
 app = Flask(__name__)
 
@@ -31,27 +33,29 @@ def hello_world():
     return 'Hello, World!'
 
 
-def immortal(input_body):
-    sender = input_body.get('sender_type')
-    event = input_body.get('event')
-    group_id = input_body.get('group_id')
+@app.route('/api/dadbot', methods=['POST'])
+def dadbot():
+    input_body = request.json
+    text = input_body['text']
+    message = ''
 
-    if not event or sender != 'system':
-        return
+    if 'dadbot tell a joke' in text:
+        with open(DADJOKE_FILE, 'r', encoding='utf-8') as csv:
+            joke_reader = DictReader(csv)
+            dad_jokes = list(joke_reader)
+        message = choice(dad_jokes)['Joke']
+    elif 'I am ' in text or 'I\'m ' in text:
+        base = re.search('(.*)(I\'m |I am )(.*)', text).group(3)
+        message = f'Hi {base}! I\'m dadbot!'
+    elif 'dad' in text or 'daddy' in text:
+        message = 'You rang?'
 
-    event_type = event['type']
-    if event_type == 'membership.notifications.removed':
-        removed_user = event['data']['removed_user']
-        nickname = removed_user.get('nickname')
-        uid = removed_user.get('id')
-        data = {"members": [{"nickname": f'Immortal {nickname}', "user_id": uid}]}
-        resp = requests.post(f'{GROUPME}/groups/{group_id}/members/add',
-                             headers={'X-Access-Token': GROUPME_TOKEN},
-                             json=data)
-        if not resp.ok:
-            raise ConnectionError(f'Problem with Groupme API {resp.content}')
+    body = {"bot_id": DADBOT, "text": message}
+    resp = requests.post(f'{GROUPME}/bots/post', data=body)
+    if not resp.ok:
+        raise ValueError(resp)
 
-        return True
+    return Response(message)
 
 
 @app.route('/api/nukebot/', methods=['POST'])
@@ -76,8 +80,6 @@ def nukebot():
 @app.route('/api/keckbot/', methods=['POST'])
 def keckbot(): 
     input_body = request.json
-    if immortal(input_body):
-        return Response('user saved')
 
     possible_responses = ['on track', 'good', 'uncertain', 'chaotic', 'accelerating', 'not good', 'not on track', 'not accelerating', 'progressing', 'not progressing']
     
@@ -119,8 +121,6 @@ def _get_rybot_message(input_body):
 def rybot():
     input_body = request.json
     message = _get_rybot_message(input_body)
-    if immortal(input_body):
-        return Response('user saved')
 
     if '@RyBot' in input_body["text"]:
         body = {"bot_id": RYBOT, "text": message}
