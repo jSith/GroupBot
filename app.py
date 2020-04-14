@@ -33,7 +33,7 @@ def hello_world():
     return 'Hello, World!'
 
 
-@app.route('/api/dadbot', methods=['POST'])
+@app.route('/api/dadbot/', methods=['POST'])
 def dadbot():
     input_body = request.json
     text = input_body['text']
