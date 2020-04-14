@@ -41,19 +41,21 @@ def dadbot():
 
     if sender_type == "bot":
         return Response()
-    
+
     message = ''
 
-    if 'dadbot tell a joke' in text:
+    if re.search('(Dadbot|dadbot) tell a joke', text):
         with open(DADJOKE_FILE, 'r', encoding='utf-8') as csv:
             joke_reader = DictReader(csv)
             dad_jokes = list(joke_reader)
         message = choice(dad_jokes)['Joke']
     elif 'I am ' in text or 'I\'m ' in text:
-        base = re.search('(.*)(I\'m |I am )(.*)', text).group(3)
+        base = re.search('(.*)(I[\'’]m |I am )(.*)', text).group(3)
         message = f'Hi {base}! I\'m dadbot!'
-    elif 'dad' in text or 'daddy' in text:
-        message = 'You rang?'
+    elif 'are we there yet' in text:
+        message = 'WE GET THERE WHEN WE GET THERE'
+    elif re.search('(Dadbot|dadbot) I love you', text):
+        message = 'I love you too son'
 
     body = {"bot_id": DADBOT, "text": message}
     resp = requests.post(f'{GROUPME}/bots/post', data=body)
