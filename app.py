@@ -55,7 +55,7 @@ def dadbot():
         base = re.search('(.*)(I[\'’]m |I am )(.*)', text).group(3)
         sentiment = analyzer.polarity_scores(base)
         if sentiment['neg']:
-            message = f'You\'re not {base}! I love you!'
+            message = f'Don\'t be {base}! I love you!'
         else:
             message = f'Hi {base}! I\'m dadbot!'
     elif 'are we there yet' in text:
