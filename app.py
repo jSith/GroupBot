@@ -6,7 +6,6 @@ from random import choice
 import re
 
 from flask import Flask, request, Response
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import requests
 
 GROUPME = 'https://api.groupme.com/v3'
@@ -44,7 +43,6 @@ def dadbot():
         return Response()
 
     message = ''
-    analyzer = SentimentIntensityAnalyzer()
 
     if re.search('(Dadbot|dadbot) tell a joke', text):
         with open(DADJOKE_FILE, 'r', encoding='utf-8') as csv:
@@ -53,11 +51,7 @@ def dadbot():
         message = choice(dad_jokes)['Joke']
     elif 'I am ' in text or 'I\'m ' in text:
         base = re.search('(.*)(I[\'’]m |I am )(.*)', text).group(3)
-        sentiment = analyzer.polarity_scores(base)
-        if sentiment['neg']:
-            message = f'Don\'t be {base}! I love you!'
-        else:
-            message = f'Hi {base}! I\'m dadbot!'
+        message = f'Hi {base}! I\'m dadbot!'
     elif 'are we there yet' in text:
         message = 'WE GET THERE WHEN WE GET THERE'
     elif re.search('(Dadbot|dadbot) I love you', text):
