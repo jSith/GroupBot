@@ -258,6 +258,14 @@ def _get_pastabot_message(command, uid, attachments):
         message = ', '.join(keys)
     elif command == 'random':
         message = choice(list(pastas.values()))
+    elif re.search('^format', command):
+        cmd = command.split(' ')[1]
+        args = command.split(' ')[2:]
+        for key in keys:
+            if cmd == key:
+                message = _var_format(pastas[key]["text"], args)
+                img_url = pastas[key]["img_url"]
+                break
     else:
         for key in keys:
             if command == key:
@@ -274,6 +282,15 @@ def _get_pastabot_message(command, uid, attachments):
 
     return message, img_url
 
+def _var_format(string, args):
+    msg = ''
+    parts = string.split('{}')
+    if (not len(parts) == len(args)) {
+        return 'Could not format pasta, incorrect number of arguments'
+    }
+    for i, j in zip(parts, args):
+        msg = f'{msg}{i} {j} '
+    return msg
 
 @app.route('/api/pastabot/', methods=['POST'])
 def pastabot():
