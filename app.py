@@ -285,9 +285,8 @@ def _get_pastabot_message(command, uid, attachments):
 def _var_format(string, args):
     msg = ''
     parts = string.split('{}')
-    if (not len(parts) == len(args)) {
+    if (not len(parts) == len(args)):
         return 'Could not format pasta, incorrect number of arguments'
-    }
     for i, j in zip(parts, args):
         msg = f'{msg}{i} {j} '
     return msg
