@@ -72,7 +72,7 @@ def nukebot():
     sender = input_body['sender_id']
     sender_type = input_body["sender_type"]
 
-    if sender_type != "bot":
+    if sender == NUKE_SENDER:
         text = ''.join([message.upper()] * 1000)
         broken_strings = break_string(text)
 
