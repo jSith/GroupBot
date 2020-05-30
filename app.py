@@ -70,8 +70,9 @@ def nukebot():
     input_body = request.json
     message = input_body['text']
     sender = input_body['sender_id']
+    sender_type = input_body["sender_type"]
 
-    if sender == NUKE_SENDER:
+    if sender_type != "bot":
         text = ''.join([message.upper()] * 1000)
         broken_strings = break_string(text)
 
