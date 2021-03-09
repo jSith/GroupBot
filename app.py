@@ -322,7 +322,7 @@ def pastabot():
         body = {"bot_id": bot_id, "text": string}
         resp = requests.post(f'{GROUPME}/bots/post', data=body)
         if not resp.ok:
-            print(resp.reason)
+            print(resp.text)
             raise ValueError(resp)
 
     if img_url:
