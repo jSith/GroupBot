@@ -1,6 +1,7 @@
 from base64 import b64encode
 from csv import reader, writer, DictReader
 from difflib import get_close_matches
+import json
 import os
 from random import choice
 import re
@@ -57,7 +58,7 @@ def dadbot():
     elif re.search('(Dadbot|dadbot) I love you', text):
         message = 'I love you too son'
 
-    body = {"bot_id": DADBOT, "text": message}
+    body = json.dumps({"bot_id": DADBOT, "text": message})
     resp = requests.post(f'{GROUPME}/bots/post', data=body)
     if not resp.ok:
         raise ValueError(resp)
@@ -77,7 +78,7 @@ def nukebot():
         broken_strings = break_string(text)
 
         for string in broken_strings:
-            body = {"bot_id": NUKEBOT, "text": string}
+            body = json.dumps({"bot_id": NUKEBOT, "text": string})
             resp = requests.post(f'{GROUPME}/bots/post', data=body)
             if not resp.ok:
                 raise ValueError(resp.content)
@@ -94,7 +95,7 @@ def keckbot():
     message = f"progress is {choice(possible_responses)}."
 
     if '@keckbot' in input_body["text"]:
-        body = {"bot_id": KECKBOT, "text": message}
+        body = json.dumps({"bot_id": KECKBOT, "text": message})
         resp = requests.post(f'{GROUPME}/bots/post', data=body)
         if not resp.ok:
             raise ValueError(resp)
@@ -131,7 +132,7 @@ def rybot():
     message = _get_rybot_message(input_body)
 
     if '@RyBot' in input_body["text"]:
-        body = {"bot_id": RYBOT, "text": message}
+        body = json.dumps({"bot_id": RYBOT, "text": message})
         resp = requests.post(f'{GROUPME}/bots/post', data=body)
         if not resp.ok:
             raise ValueError(resp)
@@ -319,14 +320,14 @@ def pastabot():
 
     broken_string = break_string(message)
     for string in broken_string:
-        body = {"bot_id": bot_id, "text": string}
+        body = json.dumps({"bot_id": bot_id, "text": string})
         resp = requests.post(f'{GROUPME}/bots/post', data=body)
         if not resp.ok:
             print(resp.text)
             raise ValueError(resp)
 
     if img_url:
-        body = {"bot_id": bot_id, "picture_url": img_url}
+        body = json.dumps({"bot_id": bot_id, "picture_url": img_url})
         resp = requests.post(f'{GROUPME}/bots/post', data=body)
         if not resp.ok:
             raise ValueError(resp)
